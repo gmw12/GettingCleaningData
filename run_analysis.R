@@ -27,12 +27,21 @@ merge_data <- function()   {
                       rbind(X_test, X_train))
     
     names(all_data) <- c("subject", "activity", features$V2)
+
     
     #Uses descriptive activity names to name the activities in the data set
     all_data$activity <- unlist(lapply(all_data$activity, function(x) activity$V2[match(x, activity$V1)]  ) )
     
     #Extracts only the measurements on the mean and standard deviation for each measurement.
-    mean_std_data <<- select(all_data, matches("subject|activity|mean|std"))
+    mean_std_data <<- select(all_data, contains("subject"), contains("activity"),
+                             contains("mean"), contains("std"), -contains("freq"),
+                             -contains("angle"))
+    
+    # clean column names, by removing "()", replacing "-" with "_", and removing "BodyBody" with "Body"
+    names(mean_std_data) <<- gsub("\\(\\)", "", colnames(mean_std_data))
+    names(mean_std_data) <<- gsub("-", "_", colnames(mean_std_data))
+    names(mean_std_data) <<- gsub("BodyBody", "Body", colnames(mean_std_data))
+    
 }
 
 merge_data()
@@ -40,7 +49,7 @@ merge_data()
 
 #creates a second, independent tidy data set with the average of each variable for each activity and each subject.
 average_data <- mean_std_data %>% 
-    group_by(activity, subject) %>%
+    group_by(subject, activity) %>%
     summarise_all(mean) %>%
     arrange(subject, activity)
 
@@ -50,7 +59,7 @@ average_data <- mean_std_data %>%
 write.table(average_data, file="./data/tidy_summary_mean_std_data.txt", row.names = FALSE)
 
 
+write.csv(average_data, file="./data/tidy_summary_mean_std_data.csv", row.names = FALSE)
 
-# Codebook creation
-library(dataMaid)
-makeCodebook(average_data)
+
+

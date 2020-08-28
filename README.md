@@ -46,8 +46,6 @@ Required R Packages:
 
 The following packages are required for run_analysis.R: data.table, dplyr
 
-CodeBook:
-dataMaid package was used to create Codebook
 
 Source for data:
 
